@@ -45,7 +45,7 @@ export class CacheService implements OnModuleDestroy {
       this.isConnected = false;
     });
 
-    this.connect();
+    void this.connect();
   }
 
   private async connect(): Promise<void> {

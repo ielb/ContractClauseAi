@@ -11,19 +11,32 @@ export class CacheService implements OnModuleDestroy {
   constructor(private readonly configService: ConfigService) {
     const redisConfig = this.configService.get('redis') as {
       url: string;
-      password: string;
+      password?: string;
       host: string;
       port: number;
     };
 
-    this.redisClient = createClient({
+    const clientConfig: {
+      url: string;
+      password?: string;
+      socket: {
+        host: string;
+        port: number;
+      };
+    } = {
       url: redisConfig.url,
-      password: redisConfig.password,
       socket: {
         host: redisConfig.host,
         port: redisConfig.port,
       },
-    });
+    };
+
+    // Only add password if it's provided
+    if (redisConfig.password) {
+      clientConfig.password = redisConfig.password;
+    }
+
+    this.redisClient = createClient(clientConfig);
 
     this.redisClient.on('error', (err) => {
       this.logger.error('Redis Client Error:', err);

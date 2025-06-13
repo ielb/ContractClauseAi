@@ -66,7 +66,7 @@ export class AuthService {
       emailVerificationExpires: verificationExpires,
     });
 
-    const savedUser = await user.save();
+    await user.save();
 
     // Send verification email
     try {

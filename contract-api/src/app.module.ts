@@ -6,6 +6,7 @@ import { DatabaseModule } from './database/database.module';
 import { StorageModule } from './storage/storage.module';
 import { CacheModule } from './cache/cache.module';
 import { TestModule } from './test/test.module';
+import { AuthModule } from './auth/auth.module';
 import configuration from './config/configuration';
 
 @Module({
@@ -19,6 +20,7 @@ import configuration from './config/configuration';
     StorageModule,
     CacheModule,
     TestModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,0 +1,124 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+### 🧠 General Guidelines
+
+1. **Follow Git Flow**: Use a clear branching strategy (e.g., `main`, `develop`, `feature/*`, `bugfix/*`).
+2. **Ensure Task Isolation**: Each task must have its own dedicated branch to maintain clean separation of concerns.
+3. **Use Descriptive Names**: Use concise and informative branch names (e.g., `feature/login-form-validation`).
+4. **Write Clear Commit Messages**: Use conventional commits (e.g., `feat: add user registration endpoint`).
+
+---
+
+### ⚙️ Standard Task Execution Workflow
+
+#### 1. **Initialization**
+
+* ✅ On each task start:
+
+  * Pull the latest changes from `develop`.
+  * Checkout to `develop` branch:
+
+    ```bash
+    git checkout develop && git pull origin develop
+    ```
+  * Create a new task-specific branch:
+
+    ```bash
+    git checkout -b feature/{task-name}
+    ```
+
+#### 2. **Development Rules**
+
+* Next.js:
+
+  * Ensure all pages are **server-side rendered (SSR)** or **static** as per requirements.
+  * Use `app` directory (Next.js 13+ preferred).
+  * Validate forms and API interactions with appropriate client-side and server-side checks.
+
+* NestJS:
+
+  * Use **modular architecture** with proper separation (controllers, services, DTOs).
+  * Validate all incoming data using `class-validator` and DTOs.
+  * Handle errors via centralized `ExceptionFilters`.
+  * always use yarn for dependencies
+
+* MongoDB:
+
+  * Use `mongoose` or `@nestjs/mongoose`.
+  * Use schemas with validation, timestamps, and indexes.
+  * Avoid unnecessary nested documents—normalize data where possible.
+
+* AWS & DevOps:
+
+  * Ensure `.env` variables are properly defined for each environment.
+  * Update environment-specific secrets using AWS Secrets Manager or SSM.
+  * If deploying, use GitHub Actions / CI pipelines to trigger builds (based on PR merge to `main`).
+
+---
+
+#### 3. **Code Completion**
+
+* ✅ After finishing development:
+
+  * Ensure:
+
+    * ✅ All tests pass (`unit`, `integration`, `e2e` if applicable).
+    * ✅ Lint and format checks pass.
+  * Commit changes:
+
+    ```bash
+    git add .
+    git commit -m "feat: implemented {task-description}"
+    ```
+  * Push branch to remote:
+
+    ```bash
+    git push origin feature/{task-name}
+    ```
+
+---
+
+#### 4. **Pull Request**
+
+* Create a **Pull Request** to merge into `develop`.
+* Add proper description, screenshots, or test logs if needed.
+* Assign reviewer (human or AI-based reviewer).
+* Wait for code review before merging.
+
+---
+
+### 📁 Folder Structure Conventions
+
+#### Frontend (Next.js):
+
+```
+/app
+  /dashboard
+  /auth
+/components
+/lib
+/styles
+```
+
+#### Backend (NestJS):
+
+```
+/src
+  /modules
+    /user
+    /auth
+  /common
+  /config
+```
+
+---
+
+### 🚨 Caution
+
+* ❌ Do **not** commit `.env` files or AWS credentials.
+* ❌ Do **not** push directly to `main` or `develop`.
+* ❌ Do **not** hardcode credentials or config values.
+

@@ -9,23 +9,27 @@ import {
   HttpStatus,
   Patch,
 } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
 import {
   ApiTags,
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
-  ApiBody,
 } from '@nestjs/swagger';
 
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
-import { User } from '../schemas/user.schema';
+import { VerifyEmailDto } from './dto/verify-email.dto';
+import { ResendVerificationDto } from './dto/resend-verification.dto';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 interface AuthenticatedRequest extends Request {
-  user: User & { _id: string };
+  user: {
+    id: string;
+    email: string;
+    role: string;
+  };
 }
 
 @ApiTags('Authentication')
@@ -34,15 +38,16 @@ export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post('register')
-  @ApiOperation({ summary: 'Register a new user' })
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Register a new user account' })
   @ApiResponse({
     status: 201,
-    description: 'User successfully registered',
+    description: 'User registered successfully. Verification email sent.',
     schema: {
       type: 'object',
       properties: {
-        user: { $ref: '#/components/schemas/User' },
-        token: { type: 'string' },
+        message: { type: 'string' },
+        email: { type: 'string' },
       },
     },
   })
@@ -51,42 +56,87 @@ export class AuthController {
     return this.authService.register(registerDto);
   }
 
-  @Post('login')
+  @Post('verify-email')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Login user' })
+  @ApiOperation({ summary: 'Verify user email address' })
   @ApiResponse({
     status: 200,
-    description: 'User successfully logged in',
+    description: 'Email verified successfully',
     schema: {
       type: 'object',
       properties: {
-        user: { $ref: '#/components/schemas/User' },
+        message: { type: 'string' },
+        user: { type: 'object' },
         token: { type: 'string' },
       },
     },
   })
-  @ApiResponse({ status: 401, description: 'Invalid credentials' })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid or expired verification token',
+  })
+  async verifyEmail(@Body() verifyEmailDto: VerifyEmailDto) {
+    return this.authService.verifyEmail(verifyEmailDto);
+  }
+
+  @Post('resend-verification')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Resend email verification' })
+  @ApiResponse({
+    status: 200,
+    description: 'Verification email sent',
+    schema: {
+      type: 'object',
+      properties: {
+        message: { type: 'string' },
+      },
+    },
+  })
+  @ApiResponse({ status: 404, description: 'User not found' })
+  @ApiResponse({ status: 400, description: 'Email already verified' })
+  async resendVerification(@Body() resendDto: ResendVerificationDto) {
+    return this.authService.resendVerificationEmail(resendDto);
+  }
+
+  @Post('login')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Login with email and password' })
+  @ApiResponse({
+    status: 200,
+    description: 'Login successful',
+    schema: {
+      type: 'object',
+      properties: {
+        user: { type: 'object' },
+        token: { type: 'string' },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Invalid credentials or email not verified',
+  })
   async login(@Body() loginDto: LoginDto) {
     return this.authService.login(loginDto);
   }
 
   @Get('profile')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Get user profile' })
+  @ApiOperation({ summary: 'Get current user profile' })
   @ApiResponse({
     status: 200,
     description: 'User profile retrieved successfully',
-    type: User,
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async getProfile(@Request() req: AuthenticatedRequest) {
-    return this.authService.getUserProfile(req.user._id);
+    return this.authService.getUserProfile(req.user.id);
   }
 
   @Post('refresh')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Refresh JWT token' })
   @ApiResponse({
     status: 200,
@@ -100,14 +150,13 @@ export class AuthController {
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async refreshToken(@Request() req: AuthenticatedRequest) {
-    return this.authService.refreshToken(req.user._id);
+    return this.authService.refreshToken(req.user.id);
   }
 
   @Patch('change-password')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Change user password' })
-  @ApiBody({ type: ChangePasswordDto })
   @ApiResponse({
     status: 200,
     description: 'Password changed successfully',
@@ -118,14 +167,14 @@ export class AuthController {
       },
     },
   })
-  @ApiResponse({ status: 400, description: 'Invalid current password' })
+  @ApiResponse({ status: 400, description: 'Current password is incorrect' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async changePassword(
     @Request() req: AuthenticatedRequest,
     @Body() changePasswordDto: ChangePasswordDto,
   ) {
     return this.authService.changePassword(
-      req.user._id,
+      req.user.id,
       changePasswordDto.currentPassword,
       changePasswordDto.newPassword,
     );

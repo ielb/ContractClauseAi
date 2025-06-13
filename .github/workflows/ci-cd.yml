@@ -7,7 +7,7 @@ on:
     branches: [main, develop]
 
 env:
-  NODE_VERSION: "22.x"
+  NODE_VERSION: "23.x"
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 
@@ -57,12 +57,12 @@ jobs:
       - name: Run ESLint
         run: |
           cd contract-api
-          yarn lint
+          yarn lint:check
 
       - name: Run Prettier check
         run: |
           cd contract-api
-          yarn format --check
+          yarn format:check
 
       - name: Run unit tests
         run: |

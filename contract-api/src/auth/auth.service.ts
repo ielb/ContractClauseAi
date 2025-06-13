@@ -371,7 +371,6 @@ export class AuthService {
 
     // Send confirmation email
     try {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       await this.emailService.sendPasswordChangeConfirmationEmail(
         user.email,
         user.name,

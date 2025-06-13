@@ -36,6 +36,18 @@ export class User {
   @Prop({ default: true })
   isActive: boolean;
 
+  @Prop({ select: false })
+  emailVerificationToken?: string;
+
+  @Prop({ select: false })
+  emailVerificationExpires?: Date;
+
+  @Prop({ select: false })
+  passwordResetToken?: string;
+
+  @Prop({ select: false })
+  passwordResetExpires?: Date;
+
   @ApiProperty({ description: 'User subscription plan', example: 'free' })
   @Prop({ default: 'free', enum: ['free', 'basic', 'premium'] })
   subscriptionPlan: string;

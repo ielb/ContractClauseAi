@@ -63,7 +63,19 @@ export class CacheService implements OnModuleDestroy {
 
   private async connect(): Promise<void> {
     try {
-      await this.redisClient.connect();
+      // Skip Redis connection in test environment if not available
+      if (process.env.NODE_ENV === 'test') {
+        try {
+          await this.redisClient.connect();
+        } catch {
+          this.logger.warn(
+            'Redis not available in test environment, skipping connection',
+          );
+          return;
+        }
+      } else {
+        await this.redisClient.connect();
+      }
     } catch (error) {
       this.logger.error('Failed to connect to Redis:', error);
     }
@@ -71,9 +83,17 @@ export class CacheService implements OnModuleDestroy {
 
   async onModuleDestroy(): Promise<void> {
     try {
-      await this.redisClient.quit();
+      if (this.isConnected && this.redisClient.isOpen) {
+        await this.redisClient.quit();
+      }
     } catch (error) {
       this.logger.error('Error closing Redis connection:', error);
+      // Force disconnect if quit fails
+      try {
+        await this.redisClient.disconnect();
+      } catch (disconnectError) {
+        this.logger.error('Error disconnecting Redis:', disconnectError);
+      }
     }
   }
 

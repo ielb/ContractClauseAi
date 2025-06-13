@@ -206,4 +206,66 @@ export class EmailService {
       // Don't throw error for welcome email as it's not critical
     }
   }
+
+  async sendPasswordChangeConfirmationEmail(
+    email: string,
+    name: string,
+  ): Promise<void> {
+    if (!this.transporter) {
+      this.logger.warn(
+        'Email service not configured. Skipping password change confirmation email.',
+      );
+      return;
+    }
+
+    const appUrl =
+      this.configService.get<string>('APP_URL') || 'http://localhost:3000';
+
+    const mailOptions = {
+      from: this.configService.get<string>('EMAIL_USER'),
+      to: email,
+      subject: 'Password Changed Successfully - ContractClauseAI',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #333;">Password Changed Successfully</h2>
+          <p>Hi ${name},</p>
+          <p>Your password has been successfully changed for your ContractClauseAI account.</p>
+          
+          <p><strong>When:</strong> ${new Date().toLocaleString()}</p>
+          
+          <p>If you did not make this change, please contact our support team immediately at <a href="mailto:support@contractclauseai.com">support@contractclauseai.com</a></p>
+          
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${appUrl}/auth/login" 
+               style="background-color: #007bff; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block;">
+              Login to Your Account
+            </a>
+          </div>
+          
+          <p>For your security:</p>
+          <ul>
+            <li>Keep your password private and secure</li>
+            <li>Use a unique password for your ContractClauseAI account</li>
+            <li>Consider using a password manager</li>
+          </ul>
+          
+          <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;">
+          <p style="color: #666; font-size: 12px;">
+            This email was sent by ContractClauseAI. If you have any questions, please contact our support team.
+          </p>
+        </div>
+      `,
+    };
+
+    try {
+      await this.transporter.sendMail(mailOptions);
+      this.logger.log(`Password change confirmation email sent to ${email}`);
+    } catch (error) {
+      this.logger.error(
+        `Failed to send password change confirmation email to ${email}:`,
+        error,
+      );
+      // Don't throw error for confirmation email as it's not critical
+    }
+  }
 }

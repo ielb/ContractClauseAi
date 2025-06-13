@@ -56,6 +56,65 @@ export class User {
   @Prop()
   subscriptionExpiry?: Date;
 
+  // GDPR Compliance Fields
+  @ApiProperty({ description: 'GDPR consent given date' })
+  @Prop({ default: Date.now })
+  gdprConsentDate: Date;
+
+  @ApiProperty({ description: 'GDPR consent version accepted' })
+  @Prop({ default: '1.0' })
+  gdprConsentVersion: string;
+
+  @ApiProperty({ description: 'Marketing consent status' })
+  @Prop({ default: false })
+  marketingConsent: boolean;
+
+  @ApiProperty({ description: 'Analytics consent status' })
+  @Prop({ default: false })
+  analyticsConsent: boolean;
+
+  @ApiProperty({ description: 'Data processing consent status' })
+  @Prop({ default: true })
+  dataProcessingConsent: boolean;
+
+  @ApiProperty({ description: 'Data deletion request status' })
+  @Prop({ default: false })
+  deletionRequested: boolean;
+
+  @ApiProperty({ description: 'Data deletion request date' })
+  @Prop()
+  deletionRequestDate?: Date;
+
+  @ApiProperty({
+    description: 'Scheduled deletion date (30 days after request)',
+  })
+  @Prop()
+  scheduledDeletionDate?: Date;
+
+  @ApiProperty({ description: 'Last data export date' })
+  @Prop()
+  lastDataExport?: Date;
+
+  // Future Features Preparation
+  @ApiProperty({ description: 'Multi-factor authentication enabled' })
+  @Prop({ default: false })
+  mfaEnabled: boolean;
+
+  @Prop({ select: false })
+  mfaSecret?: string;
+
+  @ApiProperty({ description: 'Backup codes for MFA' })
+  @Prop({ type: [String], select: false })
+  mfaBackupCodes?: string[];
+
+  @ApiProperty({ description: 'Subscription metadata for future features' })
+  @Prop({ type: Object, default: {} })
+  subscriptionMetadata: Record<string, any>;
+
+  @ApiProperty({ description: 'User preferences for future customization' })
+  @Prop({ type: Object, default: {} })
+  preferences: Record<string, any>;
+
   @ApiProperty({ description: 'Account creation date' })
   createdAt?: Date;
 

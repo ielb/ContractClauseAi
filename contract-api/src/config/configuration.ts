@@ -21,9 +21,7 @@ export default () => ({
   },
   redis: {
     url: process.env.REDIS_URL || 'redis://localhost:6379',
-    password:
-      process.env.REDIS_PASSWORD ||
-      (process.env.NODE_ENV === 'test' ? undefined : 'devpassword'),
+    password: process.env.REDIS_PASSWORD || undefined,
     host: process.env.REDIS_HOST || 'localhost',
     port: parseInt(process.env.REDIS_PORT || '6379', 10),
   },

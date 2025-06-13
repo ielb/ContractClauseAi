@@ -1,0 +1,410 @@
+{
+  "info": {
+    "name": "ContractClauseAI API - Complete Collection",
+    "description": "Complete API collection for ContractClauseAI including Authentication, Health checks, and Testing endpoints",
+    "version": "1.0.0",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Health & Status",
+      "item": [
+        {
+          "name": "Basic Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/",
+              "host": ["{{baseUrl}}"],
+              "path": [""]
+            },
+            "description": "Basic health check endpoint to verify API is running"
+          },
+          "response": []
+        },
+        {
+          "name": "Detailed Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
+            },
+            "description": "Detailed health check with system status information"
+          },
+          "response": []
+        }
+      ],
+      "description": "Health check and status endpoints"
+    },
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.token) {",
+                  "        pm.collectionVariables.set('token', response.token);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"SecurePassword123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            },
+            "description": "Register a new user account"
+          },
+          "response": []
+        },
+        {
+          "name": "Login User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.token) {",
+                  "        pm.collectionVariables.set('token', response.token);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"SecurePassword123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Login with existing user credentials"
+          },
+          "response": []
+        },
+        {
+          "name": "Get User Profile",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "profile"]
+            },
+            "description": "Get current user profile information (requires authentication)"
+          },
+          "response": []
+        },
+        {
+          "name": "Refresh Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.token) {",
+                  "        pm.collectionVariables.set('token', response.token);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/refresh",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "refresh"]
+            },
+            "description": "Refresh JWT token (requires valid existing token)"
+          },
+          "response": []
+        },
+        {
+          "name": "Change Password",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"SecurePassword123!\",\n  \"newPassword\": \"NewSecurePassword456!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/change-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "change-password"]
+            },
+            "description": "Change user password (requires authentication and current password)"
+          },
+          "response": []
+        }
+      ],
+      "description": "User authentication and account management endpoints"
+    },
+    {
+      "name": "Testing & Development",
+      "item": [
+        {
+          "name": "S3 Storage Tests",
+          "item": [
+            {
+              "name": "Test S3 Upload",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"fileName\": \"test-file.txt\",\n  \"content\": \"This is a test file content for S3 upload testing.\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/test/s3/upload",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["test", "s3", "upload"]
+                },
+                "description": "Test S3 file upload functionality"
+              },
+              "response": []
+            },
+            {
+              "name": "Test S3 Download",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/test/s3/download/test-file.txt",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["test", "s3", "download", "test-file.txt"]
+                },
+                "description": "Test S3 file download functionality"
+              },
+              "response": []
+            },
+            {
+              "name": "Test S3 Presigned URL",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/test/s3/presigned/test-file.txt",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["test", "s3", "presigned", "test-file.txt"]
+                },
+                "description": "Generate S3 presigned URL for file access"
+              },
+              "response": []
+            }
+          ],
+          "description": "S3 storage service testing endpoints"
+        },
+        {
+          "name": "Redis Cache Tests",
+          "item": [
+            {
+              "name": "Test Redis Set",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"key\": \"sample-key\",\n  \"value\": \"sample-value\",\n  \"ttl\": 3600\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/test/redis/set",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["test", "redis", "set"]
+                },
+                "description": "Test Redis key-value set operation"
+              },
+              "response": []
+            },
+            {
+              "name": "Test Redis Get",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/test/redis/get/sample-key",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["test", "redis", "get", "sample-key"]
+                },
+                "description": "Test Redis key-value get operation"
+              },
+              "response": []
+            },
+            {
+              "name": "Test Redis Set Object",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"key\": \"sample-object\",\n  \"object\": {\n    \"name\": \"Test Object\",\n    \"type\": \"sample\",\n    \"timestamp\": \"2024-01-01T00:00:00Z\"\n  },\n  \"ttl\": 7200\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/test/redis/set-object",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["test", "redis", "set-object"]
+                },
+                "description": "Test Redis object storage"
+              },
+              "response": []
+            },
+            {
+              "name": "Test Redis Get Object",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/test/redis/get-object/sample-object",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["test", "redis", "get-object", "sample-object"]
+                },
+                "description": "Test Redis object retrieval"
+              },
+              "response": []
+            }
+          ],
+          "description": "Redis cache service testing endpoints"
+        },
+        {
+          "name": "System Connectivity Tests",
+          "item": [
+            {
+              "name": "Test All Connections",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/test/connectivity",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["test", "connectivity"]
+                },
+                "description": "Test connectivity to all external services (MongoDB, Redis, S3)"
+              },
+              "response": []
+            }
+          ],
+          "description": "System connectivity testing endpoints"
+        }
+      ],
+      "description": "Development and testing endpoints for verifying system functionality"
+    }
+  ]
+}

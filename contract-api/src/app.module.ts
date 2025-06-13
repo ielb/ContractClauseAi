@@ -8,6 +8,7 @@ import { CacheModule } from './cache/cache.module';
 import { TestModule } from './test/test.module';
 import { AuthModule } from './auth/auth.module';
 import { EmailModule } from './email/email.module';
+import { UserModule } from './user/user.module';
 import configuration from './config/configuration';
 
 @Module({
@@ -23,6 +24,7 @@ import configuration from './config/configuration';
     TestModule,
     AuthModule,
     EmailModule,
+    UserModule,
   ],
   controllers: [AppController],
   providers: [AppService],

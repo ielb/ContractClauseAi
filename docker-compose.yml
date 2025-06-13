@@ -1,0 +1,115 @@
+version: "3.8"
+
+services:
+  # ==============================================
+  # Backend API Service
+  # ==============================================
+  api:
+    build:
+      context: ./contract-api
+      dockerfile: Dockerfile
+      target: production
+    container_name: contract-api
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=development
+      - PORT=3001
+      - MONGODB_URI=mongodb://mongodb:27017/contract-clause-ai
+      - REDIS_URL=redis://redis:6379
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - mongodb
+      - redis
+    volumes:
+      - ./contract-api/uploads:/app/uploads
+    networks:
+      - contract-network
+    restart: unless-stopped
+
+  # ==============================================
+  # MongoDB Database
+  # ==============================================
+  mongodb:
+    image: mongo:7.0
+    container_name: contract-mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=password
+      - MONGO_INITDB_DATABASE=contract-clause-ai
+    volumes:
+      - mongodb_data:/data/db
+      - ./scripts/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    networks:
+      - contract-network
+    restart: unless-stopped
+
+  # ==============================================
+  # Redis Cache
+  # ==============================================
+  redis:
+    image: redis:7.2-alpine
+    container_name: contract-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - contract-network
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+
+  # ==============================================
+  # MongoDB Admin Interface (Optional)
+  # ==============================================
+  mongo-express:
+    image: mongo-express:1.0.2
+    container_name: contract-mongo-express
+    ports:
+      - "8081:8081"
+    environment:
+      - ME_CONFIG_MONGODB_ADMINUSERNAME=root
+      - ME_CONFIG_MONGODB_ADMINPASSWORD=password
+      - ME_CONFIG_MONGODB_SERVER=mongodb
+      - ME_CONFIG_BASICAUTH_USERNAME=admin
+      - ME_CONFIG_BASICAUTH_PASSWORD=admin
+    depends_on:
+      - mongodb
+    networks:
+      - contract-network
+    restart: unless-stopped
+
+  # ==============================================
+  # Redis Admin Interface (Optional)
+  # ==============================================
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: contract-redis-commander
+    ports:
+      - "8082:8081"
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    depends_on:
+      - redis
+    networks:
+      - contract-network
+    restart: unless-stopped
+
+# ==============================================
+# Volumes
+# ==============================================
+volumes:
+  mongodb_data:
+    driver: local
+  redis_data:
+    driver: local
+
+# ==============================================
+# Networks
+# ==============================================
+networks:
+  contract-network:
+    driver: bridge
